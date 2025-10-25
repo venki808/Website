@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     && docker-php-ext-install pdo pdo_pgsql pgsql
 
-# Enable Apache mod_rewrite (needed for Laravel routes)
+# Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
 # Install Composer globally
@@ -22,14 +22,21 @@ WORKDIR /var/www/html
 # Copy project files
 COPY . .
 
+# Set Apache DocumentRoot to Laravel public folder
+RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
+
 # Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Set proper permissions for storage & cache
+# Clear Laravel caches
+RUN php artisan config:clear && php artisan route:clear && php artisan cache:clear && php artisan view:clear
+
+# Set proper permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Expose port 80
 EXPOSE 80
 
-# Start Apache in foreground
+# Start Apache
 CMD ["apache2-foreground"]
+ 
