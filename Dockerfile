@@ -22,6 +22,9 @@ WORKDIR /var/www/html
 # Copy project files
 COPY . .
 
+# Copy .env explicitly
+COPY .env .env
+
 # Set Apache DocumentRoot to Laravel public folder
 RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
 
@@ -29,7 +32,10 @@ RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available
 RUN composer install --no-dev --optimize-autoloader
 
 # Clear Laravel caches
-RUN php artisan config:clear && php artisan route:clear && php artisan cache:clear && php artisan view:clear
+RUN php artisan config:clear \
+    && php artisan route:clear \
+    && php artisan cache:clear \
+    && php artisan view:clear
 
 # Set proper permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
@@ -39,4 +45,3 @@ EXPOSE 80
 
 # Start Apache
 CMD ["apache2-foreground"]
- 
