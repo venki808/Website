@@ -28,11 +28,8 @@ RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available
 # Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Clear Laravel caches
-RUN php artisan config:clear \
-    && php artisan route:clear \
-    && php artisan cache:clear \
-    && php artisan view:clear
+# (Optional) clear cached config safely
+RUN php artisan optimize:clear || true
 
 # Set proper permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
